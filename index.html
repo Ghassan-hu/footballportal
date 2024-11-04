@@ -499,15 +499,45 @@
                 const roundedMinutes = 0; // تعيين إلى 00
                 document.getElementById('startTime').value = `${String(roundedHours).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 
-                const endTime = new Date();
-                endTime.setHours(roundedHours + 1);
-                endTime.setMinutes(0); // تعيين الدقائق إلى 0
-                const endHours = String(endTime.getHours()).padStart(2, '0');
-                document.getElementById('endTime').value = `${endHours}:00`;
+                // Enable the endTime input field
+                document.getElementById('endTime').disabled = false;
 
                 // حساب المبلغ
                 const amount = 100; // المبلغ لكل ساعة
                 document.getElementById('amount').value = (1 * amount).toFixed(2); // دائماً ساعة واحدة
+            }
+        });
+
+        // Add an event listener for endTime to calculate the amount based on duration
+        document.getElementById('endTime').addEventListener('change', function () {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = this.value;
+
+            if (startTime && endTime) {
+                const [startHours, startMinutes] = startTime.split(':').map(Number);
+                const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+                const start = new Date();
+                start.setHours(startHours, startMinutes);
+
+                const end = new Date();
+                end.setHours(endHours, endMinutes);
+
+                const duration = (end - start) / (1000 * 60 * 60); // Calculate duration in hours
+
+                if (duration > 0) {
+                    const amount = 100; // المبلغ لكل ساعة
+                    document.getElementById('amount').value = (duration * amount).toFixed(2);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ!',
+                        text: 'يجب أن يكون وقت الانتهاء بعد وقت البدء.',
+                        confirmButtonText: 'حسناً'
+                    });
+                    document.getElementById('endTime').value = ''; // Reset endTime if invalid
+                    document.getElementById('amount').value = ''; // Reset amount if invalid
+                }
             }
         });
 
